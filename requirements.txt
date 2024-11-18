@@ -1,0 +1,12 @@
+streamlit
+langchain
+langchain-community
+langchain-groq
+langchain-openai
+python-dotenv
+beautifulsoup4
+pypdf
+unstructured
+fake_useragent
+PyMuPDF
+youtube-transcript-api
