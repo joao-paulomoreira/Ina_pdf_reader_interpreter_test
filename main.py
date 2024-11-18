@@ -11,6 +11,11 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
+if api_key is None:
+    raise ValueError("A chave da API não foi encontrada. Verifique o arquivo .env.")
+else:
+    print("Chave da API carregada com sucesso.")
+
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
 
