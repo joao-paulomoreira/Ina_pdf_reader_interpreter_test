@@ -16,8 +16,23 @@ if api_key is None:
 else:
     print("Chave da API carregada com sucesso.")
 
+import streamlit as st
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI
+from langchain_community.document_loaders import (WebBaseLoader, YoutubeLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
+from dotenv import load_dotenv
+import os
+from loaders import *
+import tempfile
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+import tiktoken
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
+ARQUIVO_CONTROLE_TOKENS = 'consumo_tokens.txt'
 
 def carrega_arquivos(tipo_arquivo, arquivo):
     if tipo_arquivo == 'Site':
@@ -64,6 +79,10 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     chain = template | chat
     st.session_state['chain'] = chain
 
+def salvar_tokens_txt(caminho_arquivo, contagem_tokens):
+    with open(caminho_arquivo, 'a') as arquivo:
+        arquivo.write(str(contagem_tokens) + '\n')
+
 def pagina_chat():
     st.header('Opus IA - PDF', divider=True)
     chain = st.session_state.get('chain')
@@ -92,10 +111,20 @@ def pagina_chat():
             'chat_history': memoria.buffer_as_messages,
             'user_id': user_id 
         }))
+
+        enc = tiktoken.get_encoding("cl100k_base")
+        tokens = enc.encode(resposta)
+        contagem_tokens = len(tokens)
+        print(f'A quantidade de tokens usada foi {contagem_tokens}')
+        
+        # Salvar a contagem de tokens no arquivo TXT
+        CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
+        salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, contagem_tokens)
         
         memoria.chat_memory.add_user_message(input_usuario)
         memoria.chat_memory.add_ai_message(resposta)
         st.session_state['memoria'] = memoria
+
         
 def sidebar():
     st.sidebar.header("Upload de Arquivos")
@@ -115,8 +144,6 @@ def sidebar():
     if st.sidebar.button("Limpar Conversa"):
         st.session_state.pop('memoria', None)
     return tipo_arquivo, arquivo, carregar
-
-
 
 def main():
     tipo_arquivo, arquivo, carregar = sidebar()  
