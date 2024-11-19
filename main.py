@@ -16,20 +16,6 @@ if api_key is None:
 else:
     print("Chave da API carregada com sucesso.")
 
-import streamlit as st
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import ChatOpenAI
-from langchain_community.document_loaders import (WebBaseLoader, YoutubeLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
-from dotenv import load_dotenv
-import os
-from loaders import *
-import tempfile
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-import tiktoken
-
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
 ARQUIVO_CONTROLE_TOKENS = 'consumo_tokens.txt'
