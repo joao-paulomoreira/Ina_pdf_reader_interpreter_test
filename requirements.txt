@@ -10,3 +10,4 @@ unstructured
 fake_useragent
 PyMuPDF
 youtube-transcript-api
+tiktoken
