@@ -21,7 +21,51 @@ else:
 
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
-ARQUIVO_CONTROLE_TOKENS = 'consumo_tokens.txt'
+FILE_PATH = 'consumo_tokens.txt'
+GITHUB_TOKEN = st.secrets("GITHUB_TOKEN")
+REPO_OWNER = 'joao-paulomoreira'
+REPO_NAME = 'Ina_pdf_reader_interpreter_test'
+
+def obter_conteudo_atual():
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        dados = response.json()
+        sha = dados["sha"]
+        conteudo = base64.b64decode(dados["content"]).decode("utf-8")
+        return conteudo, sha
+    elif response.status_code == 404:
+        return "", None
+    else:
+        raise Exception(f"Erro ao obter conteúdo: {response.status_code}")
+
+def atualizar_arquivo(novo_conteudo):
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+    conteudo_atual, sha = obter_conteudo_atual()
+
+    conteudo_atual += novo_conteudo + "\n"
+    conteudo_base64 = base64.b64encode(conteudo_atual.encode("utf-8")).decode("utf-8")
+
+    data = {
+        "message": "Atualizando consumo de tokens",
+        "content": conteudo_base64,
+        "sha": sha
+    }
+
+    response = requests.put(url, json=data, headers=headers)
+
+    if response.status_code in [200, 201]:
+        print("Arquivo atualizado com sucesso!")
+    else:
+        raise Exception(f"Erro ao atualizar arquivo: {response.status_code} {response.text}")
+
+def salvar_tokens_github(contagem_tokens):
+    novo_conteudo = str(contagem_tokens) 
+    atualizar_arquivo(novo_conteudo)
 
 def carrega_arquivos(tipo_arquivo, arquivo):
     if tipo_arquivo == 'Site':
@@ -71,6 +115,8 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
 def salvar_tokens_txt(caminho_arquivo, contagem_tokens):
     with open(caminho_arquivo, 'a') as arquivo:
         arquivo.write(str(contagem_tokens) + '\n')
+    
+    salvar_tokens_github(contagem_tokens)
 
 def pagina_chat():
     st.header('Opus IA - PDF', divider=True)
@@ -142,4 +188,3 @@ def main():
     pagina_chat()
 
 if __name__ == '__main__':
-    main()
