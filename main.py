@@ -22,7 +22,7 @@ else:
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
 FILE_PATH = 'consumo_tokens.txt'
-GITHUB_TOKEN = st.secrets("GITHUB_TOKEN")
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 REPO_OWNER = 'joao-paulomoreira'
 REPO_NAME = 'Ina_pdf_reader_interpreter_test'
 
