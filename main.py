@@ -188,3 +188,4 @@ def main():
     pagina_chat()
 
 if __name__ == '__main__':
+    main()
