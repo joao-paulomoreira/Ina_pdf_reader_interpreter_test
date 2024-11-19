@@ -2,6 +2,8 @@ import streamlit as st
 import tempfile
 import os
 import tiktoken
+import requests
+import base64 
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import (WebBaseLoader, YoutubeLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
