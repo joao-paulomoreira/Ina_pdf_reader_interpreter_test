@@ -164,7 +164,7 @@ def pagina_chat():
             'user_id': user_id 
         }))
 
-                enc = tiktoken.get_encoding("cl100k_base")
+        enc = tiktoken.get_encoding("cl100k_base")
         tokens = enc.encode(resposta)
         contagem_tokens = len(tokens)
         print(f'A quantidade de tokens usada foi {contagem_tokens}')
