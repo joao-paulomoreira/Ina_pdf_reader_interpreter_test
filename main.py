@@ -19,7 +19,7 @@ if api_key is None:
 else:
     print("Chave da API carregada com sucesso.")
 
-TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Youtube', 'Pdf', 'Txt']
+TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
 FILE_PATH = 'consumo_tokens.txt'
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
@@ -89,8 +89,6 @@ def salvar_tokens_github(contagem_tokens):
 def carrega_arquivos(tipo_arquivo, arquivo):
     if tipo_arquivo == 'Site':
         documento = carrega_site(arquivo)
-    elif tipo_arquivo == 'Youtube':
-        documento = carrega_youtube(arquivo)
     elif tipo_arquivo == 'Pdf':
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp:
             temp.write(arquivo.read())
@@ -187,8 +185,6 @@ def sidebar():
 
     if tipo_arquivo == 'Site':
         arquivo = st.sidebar.text_input('Digite a URL do site')
-    elif tipo_arquivo == 'Youtube':
-        arquivo = st.sidebar.text_input('Digite a URL do vídeo')
     elif tipo_arquivo == 'Pdf':
         arquivo = st.sidebar.file_uploader('Faça o upload do arquivo PDF', type=['pdf'])
     elif tipo_arquivo == 'Txt':
