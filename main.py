@@ -164,18 +164,13 @@ def pagina_chat():
             'user_id': user_id 
         }))
 
-        enc = tiktoken.get_encoding("cl100k_base")
+                enc = tiktoken.get_encoding("cl100k_base")
         tokens = enc.encode(resposta)
         contagem_tokens = len(tokens)
-        custo_por_token = 7 / 1_000_000 
-        custo_em_dolares = contagem_tokens * custo_por_token
+        print(f'A quantidade de tokens usada foi {contagem_tokens}')
         
-        print(f"A quantidade de tokens usada foi {contagem_tokens}")
-        print(f"O custo estimado em dólares foi ${custo_em_dolares:.6f}")
-
         CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
-        with open(CAMINHO_ARQUIVO_TOKENS, 'a') as arquivo:
-            arquivo.write(f"Tokens: {contagem_tokens}, Custo (USD): ${custo_em_dolares:.6f}\n")
+        salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, contagem_tokens)
         
         memoria.chat_memory.add_user_message(input_usuario)
         memoria.chat_memory.add_ai_message(resposta)
