@@ -26,6 +26,25 @@ GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 REPO_OWNER = 'joao-paulomoreira'
 REPO_NAME = 'Ina_pdf_reader_interpreter_test'
 
+def estilo_modelo():
+    st.set_page_config(
+        page_title='Ina - Leitora de PDFs',
+        page_icon='📄',
+        layout='wide',
+        initial_sidebar_state='expanded'
+    )
+    
+    st.markdown(
+        """
+            <style>
+                .stButton > button{
+                    font-size: 1em;
+                }
+            </style>
+        """,
+    unsafe_allow_html=True
+    )
+
 def obter_conteudo_atual():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
@@ -181,7 +200,10 @@ def sidebar():
     return tipo_arquivo, arquivo, carregar
 
 def main():
-    tipo_arquivo, arquivo, carregar = sidebar()  
+    estilo_modelo()
+
+    tipo_arquivo, arquivo, carregar = sidebar()
+
     if carregar and tipo_arquivo and arquivo:
         carrega_modelo(api_key, tipo_arquivo, arquivo)
 
