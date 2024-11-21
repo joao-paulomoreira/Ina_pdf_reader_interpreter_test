@@ -6,7 +6,7 @@ import requests
 import base64 
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
-from langchain_community.document_loaders import (WebBaseLoader, YoutubeLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
+from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
 from dotenv import load_dotenv
 from loaders import *
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
