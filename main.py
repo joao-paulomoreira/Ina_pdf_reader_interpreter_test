@@ -195,6 +195,7 @@ def sidebar():
     return tipo_arquivo, arquivo, carregar
 
 def main():
+    st.session_state.pop('memoria', None)
     estilo_modelo()
 
     tipo_arquivo, arquivo, carregar = sidebar()
