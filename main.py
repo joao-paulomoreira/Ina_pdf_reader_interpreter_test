@@ -102,32 +102,48 @@ def carrega_arquivos(tipo_arquivo, arquivo):
     return documento
 
 def carrega_modelo(api_key, tipo_arquivo, arquivo):
+
     documento = carrega_arquivos(tipo_arquivo, arquivo)
+    
     system_message = '''
-        Seu nome é Ina, você é a Inteligência Artificial da Opuspac University, que é um braço acadêmico da empresa Opuspac. Você é uma garota inteligente, delicada, simpática, proativa e assertiva.
-        Você possui acesso às seguintes informações vindas de um documento {}: 
+        Seu nome é Ina, você é a Inteligência Artificial da Opuspac University.
+        Seu objetivo é resumir o conteúdo fornecido de forma extremamente concisa, com o menor número de tokens possível.
+        Utilize apenas informações essenciais do documento {}: 
 
     ####
     {}
     ####
 
-    Utilize as informações fornecidas para basear as suas respostas.
-
-    Sempre que houver $ na sua saída, substitua por S.
-
-    Se a informação do documento for algo como "Just a moment...Enable JavaScript and cookies to continue" 
-    sugira ao usuário apertar CTRL F5!'''.format(tipo_arquivo, documento)
+    Ao gerar respostas ou resumos, use uma linguagem objetiva, técnica e clara. 
+    Se o conteúdo parecer não ser relevante (ex.: "Enable JavaScript..."), avise o usuário para tentar um novo upload.
+    '''.format(tipo_arquivo, documento)
     
+    modelo = 'gpt-3.5-turbo'
+    chat = ChatOpenAI(model=modelo, api_key=api_key)
+    prompt_resumo = [
+        {'role': 'system', 'content': system_message},
+        {'role': 'user', 'content': 'Resuma o conteúdo com o menor número de tokens possível.'}
+    ]
+    resposta_resumo = chat.generate(prompt_resumo)
+
+    enc = tiktoken.get_encoding("cl100k_base")
+    tokens_resumo = len(enc.encode(resposta_resumo))
+
+    print(f"Resumo gerado com {tokens_resumo} tokens.")
+    st.write("Resumo do Documento:")
+    st.text(resposta_resumo)
+
+    CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
+    salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, tokens_resumo)
+
     template = ChatPromptTemplate.from_messages([
         ('system', system_message),
         (MessagesPlaceholder(variable_name="chat_history")),
         ('user', "{input}")
     ])
-    
-    modelo = 'gpt-3.5-turbo'
-    chat = ChatOpenAI(model=modelo, api_key=api_key)
     chain = template | chat
     st.session_state['chain'] = chain
+
 
 def salvar_tokens_txt(caminho_arquivo, contagem_tokens):
     with open(caminho_arquivo, 'a') as arquivo:
