@@ -121,9 +121,10 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     modelo = 'gpt-3.5-turbo'
     chat = ChatOpenAI(model=modelo, api_key=api_key)
     prompt_resumo = [
-        {'role': 'system', 'content': system_message},
-        {'role': 'user', 'content': 'Resuma o conteúdo com o menor número de tokens possível.'}
+    SystemMessage(content=system_message),
+    HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
     ]
+    resposta_resumo = chat.generate(messages=prompt_resumo)
     resposta_resumo = chat.generate(prompt_resumo)
 
     enc = tiktoken.get_encoding("cl100k_base")
