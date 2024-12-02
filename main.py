@@ -165,7 +165,7 @@ def pagina_chat():
         chat = st.chat_message(mensagem.type)
         chat.markdown(mensagem.content)
 
-    input_usuario = st.chat_input('Mande uma mensagem...')
+    input_usuario = st.chat_input('Pergunte sobre o resumo...')
     if input_usuario:
         user_id = st.session_state.get('user_id', 'default_user')
 
