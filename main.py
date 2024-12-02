@@ -122,14 +122,13 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     modelo = 'gpt-3.5-turbo'
     chat = ChatOpenAI(model=modelo, api_key=api_key)
     prompt_resumo = [
-    SystemMessage(content=system_message),
-    HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
+        SystemMessage(content=system_message),
+        HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
     ]
-    resposta_resumo = chat.generate(messages=prompt_resumo)
-    resposta_resumo = chat.generate(prompt_resumo)
+    resposta_resumo = chat.generate(messages=prompt_resumo)  # Correção: não duplicar chamada
 
     enc = tiktoken.get_encoding("cl100k_base")
-    tokens_resumo = len(enc.encode(resposta_resumo))
+    tokens_resumo = len(enc.encode(resposta_resumo))  # Corrigir a conversão para número de tokens
 
     print(f"Resumo gerado com {tokens_resumo} tokens.")
     st.write("Resumo do Documento:")
@@ -138,7 +137,7 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
     salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, tokens_resumo)
 
-    template = ChatPromptTemplate.from_messages([
+    template = ChatPromptTemplate.from_messages([  # Correção: caso o template seja necessário
         ('system', system_message),
         (MessagesPlaceholder(variable_name="chat_history")),
         ('user', "{input}")
