@@ -10,6 +10,7 @@ from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMu
 from dotenv import load_dotenv
 from loaders import *
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.schema import HumanMessage, SystemMessage
 
 load_dotenv()
 api_key = st.secrets["OPENAI_API_KEY"]
