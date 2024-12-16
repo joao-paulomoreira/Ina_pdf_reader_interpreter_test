@@ -1,12 +1,11 @@
 import streamlit as st
 import tempfile
 import os
-import tiktoken
 import requests
-import base64 
+import base64
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
-from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
+from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMuPDFLoader, TextLoader)
 from dotenv import load_dotenv
 from loaders import *
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -34,7 +33,7 @@ def estilo_modelo():
         layout='wide',
         initial_sidebar_state='expanded'
     )
-    
+
     st.markdown(
         """
             <style>
@@ -83,10 +82,6 @@ def atualizar_arquivo(novo_conteudo):
     else:
         raise Exception(f"Erro ao atualizar arquivo: {response.status_code} {response.text}")
 
-def salvar_tokens_github(contagem_tokens):
-    novo_conteudo = str(contagem_tokens) 
-    atualizar_arquivo(novo_conteudo)
-
 def carrega_arquivos(tipo_arquivo, arquivo):
     if tipo_arquivo == 'Site':
         documento = carrega_site(arquivo)
@@ -119,7 +114,7 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     Se o conteúdo parecer não ser relevante (ex.: "Enable JavaScript..."), avise o usuário para tentar um novo upload.
     '''.format(tipo_arquivo, documento)
     
-    modelo = 'gpt-3.5-turbo'
+    modelo = 'gpt-4o-mini-2024-07-18'
     chat = ChatOpenAI(model=modelo, api_key=api_key)
     prompt_resumo = [
         SystemMessage(content=system_message),
@@ -127,17 +122,12 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     ]
     resposta_resumo = chat.generate(messages=prompt_resumo)  # Correção: não duplicar chamada
 
-    enc = tiktoken.get_encoding("cl100k_base")
-    tokens_resumo = len(enc.encode(resposta_resumo))  # Corrigir a conversão para número de tokens
+    resposta_texto = resposta_resumo['choices'][0]['message']['content']
 
-    print(f"Resumo gerado com {tokens_resumo} tokens.")
     st.write("Resumo do Documento:")
-    st.text(resposta_resumo)
+    st.text(resposta_texto)
 
-    CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
-    salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, tokens_resumo)
-
-    template = ChatPromptTemplate.from_messages([  # Correção: caso o template seja necessário
+    template = ChatPromptTemplate.from_messages([
         ('system', system_message),
         (MessagesPlaceholder(variable_name="chat_history")),
         ('user', "{input}")
@@ -145,12 +135,6 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     chain = template | chat
     st.session_state['chain'] = chain
 
-
-def salvar_tokens_txt(caminho_arquivo, contagem_tokens):
-    with open(caminho_arquivo, 'a') as arquivo:
-        arquivo.write(str(contagem_tokens) + '\n')
-    
-    salvar_tokens_github(contagem_tokens)
 
 def pagina_chat():
     st.header('Opus IA - PDF', divider=True)
@@ -181,14 +165,6 @@ def pagina_chat():
             'user_id': user_id 
         }))
 
-        enc = tiktoken.get_encoding("cl100k_base")
-        tokens = enc.encode(resposta)
-        contagem_tokens = len(tokens)
-        print(f'A quantidade de tokens usada foi {contagem_tokens}')
-        
-        CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
-        salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, contagem_tokens)
-        
         memoria.chat_memory.add_user_message(input_usuario)
         memoria.chat_memory.add_ai_message(resposta)
         st.session_state['memoria'] = memoria
