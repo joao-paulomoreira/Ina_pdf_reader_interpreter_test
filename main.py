@@ -126,9 +126,9 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     resposta_resumo = chat([SystemMessage(content=system_message), HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')])  # Ajuste na chamada
 
     if 'choices' in resposta_resumo and len(resposta_resumo['choices']) > 0:
-    resposta_texto = resposta_resumo['choices'][0].content
+        resposta_texto = resposta_resumo['choices'][0].content
     else:
-    print("Erro: resposta inesperada ou chave 'choices' não encontrada")
+        print("Erro: resposta inesperada ou chave 'choices' não encontrada")
 
     st.write("Resumo do Documento:")
     st.text(resposta_texto)
