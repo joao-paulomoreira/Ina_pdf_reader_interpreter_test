@@ -114,13 +114,16 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     Se o conteúdo parecer não ser relevante (ex.: "Enable JavaScript..."), avise o usuário para tentar um novo upload.
     '''.format(tipo_arquivo, documento)
     
-    modelo = 'gpt-4o-mini-2024-07-18'
+    modelo = 'gpt-3.5-turbo'
     chat = ChatOpenAI(model=modelo, api_key=api_key)
+
+    # As mensagens devem ser passadas corretamente no formato esperado
     prompt_resumo = [
         SystemMessage(content=system_message),
         HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
     ]
-    resposta_resumo = chat.generate(messages=prompt_resumo)  # Correção: não duplicar chamada
+
+    resposta_resumo = chat([SystemMessage(content=system_message), HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')])  # Ajuste na chamada
 
     resposta_texto = resposta_resumo['choices'][0]['message']['content']
 
