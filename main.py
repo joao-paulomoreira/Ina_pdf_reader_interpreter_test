@@ -7,21 +7,18 @@ import base64
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
+from dotenv import load_dotenv
 from loaders import *
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage, SystemMessage
 
-# Remova o load_dotenv()
-# load_dotenv() # Não é necessário no Streamlit Cloud
-
-# Acesse diretamente a chave do Streamlit Secrets
+load_dotenv()
 api_key = st.secrets["OPENAI_API_KEY"]
 
-# O código abaixo não é necessário, pois se a chave estiver ausente, o Streamlit levantará o erro automaticamente
-# if api_key is None:
-#     raise ValueError("A chave da API não foi encontrada. Verifique o arquivo .env.")
-# else:
-#     print("Chave da API carregada com sucesso.")
+if api_key is None:
+    raise ValueError("A chave da API não foi encontrada. Verifique o arquivo .env.")
+else:
+    print("Chave da API carregada com sucesso.")
 
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
@@ -122,26 +119,32 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     Se o conteúdo parecer não ser relevante (ex.: "Enable JavaScript..."), avise o usuário para tentar um novo upload.
     '''.format(tipo_arquivo, documento)
     
-    modelo = 'gpt-4o-mini-2024-07-18'
+    modelo = 'gpt-3.5-turbo'
     chat = ChatOpenAI(model=modelo, api_key=api_key)
-
-    # Gerar resumo
     prompt_resumo = [
         SystemMessage(content=system_message),
         HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
     ]
+    resposta_resumo = chat.generate(messages=prompt_resumo)  # Correção: não duplicar chamada
 
-    resposta_resumo = chat(messages=prompt_resumo)  # Ajuste correto
-    
     enc = tiktoken.get_encoding("cl100k_base")
-    tokens_resumo = len(enc.encode(resposta_resumo.content))  # Corrigir a conversão para número de tokens
+    tokens_resumo = len(enc.encode(resposta_resumo))  # Corrigir a conversão para número de tokens
 
     print(f"Resumo gerado com {tokens_resumo} tokens.")
     st.write("Resumo do Documento:")
-    st.text(resposta_resumo.content)
+    st.text(resposta_resumo)
 
     CAMINHO_ARQUIVO_TOKENS = "consumo_tokens.txt"
     salvar_tokens_txt(CAMINHO_ARQUIVO_TOKENS, tokens_resumo)
+
+    template = ChatPromptTemplate.from_messages([  # Correção: caso o template seja necessário
+        ('system', system_message),
+        (MessagesPlaceholder(variable_name="chat_history")),
+        ('user', "{input}")
+    ])
+    chain = template | chat
+    st.session_state['chain'] = chain
+
 
 def salvar_tokens_txt(caminho_arquivo, contagem_tokens):
     with open(caminho_arquivo, 'a') as arquivo:
@@ -171,13 +174,12 @@ def pagina_chat():
         chat.markdown(input_usuario)
 
         chat = st.chat_message('ai')
-        resposta = chain.run({
+        
+        resposta = chat.write_stream(chain.stream({
             'input': input_usuario, 
             'chat_history': memoria.buffer_as_messages,
             'user_id': user_id 
-        })
-
-        chat.markdown(resposta)
+        }))
 
         enc = tiktoken.get_encoding("cl100k_base")
         tokens = enc.encode(resposta)
@@ -191,6 +193,7 @@ def pagina_chat():
         memoria.chat_memory.add_ai_message(resposta)
         st.session_state['memoria'] = memoria
 
+        
 def sidebar():
     st.sidebar.header("Upload de Arquivos")
     tipo_arquivo = st.sidebar.selectbox('Selecione o tipo de arquivo', TIPOS_ARQUIVOS_VALIDOS)
