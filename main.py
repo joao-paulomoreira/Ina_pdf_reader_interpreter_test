@@ -123,8 +123,8 @@ def carrega_modelo(api_key, tipo_arquivo, arquivo):
     chat = ChatOpenAI(model=modelo, api_key=api_key)
     prompt_resumo = [
         SystemMessage(content=system_message),
-        HumanMessage(content='Resuma o conteúdo com o menor número de tokens possível.')
-    ]
+        HumanMessage(content="Resuma o conteúdo com o menor número de tokens possível.")
+]
     resposta_resumo = chat.generate(messages=prompt_resumo)  # Correção: não duplicar chamada
 
     enc = tiktoken.get_encoding("cl100k_base")
