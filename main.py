@@ -7,18 +7,21 @@ import base64
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import (WebBaseLoader, CSVLoader, PyMuPDFLoader, TextLoader) 
-from dotenv import load_dotenv
 from loaders import *
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage, SystemMessage
 
-load_dotenv()
+# Remova o load_dotenv()
+# load_dotenv() # Não é necessário no Streamlit Cloud
+
+# Acesse diretamente a chave do Streamlit Secrets
 api_key = st.secrets["OPENAI_API_KEY"]
 
-if api_key is None:
-    raise ValueError("A chave da API não foi encontrada. Verifique o arquivo .env.")
-else:
-    print("Chave da API carregada com sucesso.")
+# O código abaixo não é necessário, pois se a chave estiver ausente, o Streamlit levantará o erro automaticamente
+# if api_key is None:
+#     raise ValueError("A chave da API não foi encontrada. Verifique o arquivo .env.")
+# else:
+#     print("Chave da API carregada com sucesso.")
 
 TIPOS_ARQUIVOS_VALIDOS = ['Site', 'Pdf', 'Txt']
 MEMORIA = ConversationBufferMemory()
